@@ -29,12 +29,11 @@ async function build() {
     const done = promisify(stream.finished);
     const writer = createWriteStream(destinationPath);
     try {
-      await axios({ method: 'get', url: path, responseType: 'stream' }).then(function (response) {
-        response.data.pipe(writer);
-        return done(writer);
-      });
+      const response = await axios({ method: 'get', url: path, responseType: 'stream' });
+      response.data.pipe(writer);
+      await done(writer);
     } catch (error) {
-      throw new OutputAndExitError(error);
+      OutputAndExitError(error);
     }
   }
 
@@ -46,7 +45,7 @@ async function build() {
     await zip.extract(null, tmpTestDir);
     await zip.close();
   } catch (error) {
-    throw new OutputAndExitError(error);
+    OutputAndExitError(error);
   }
 
   const currentDir = process.cwd();
